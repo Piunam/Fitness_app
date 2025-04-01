@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Workout Plans</h1>
+
+<div class="row">
+    {% for workout in workouts %}
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ workout.name }}</h5>
+                <p class="card-text">{{ workout.description }}</p>
+                <a href="#" class="btn btn-primary">Start Workout</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>No workout plans available.</p>
+    {% endfor %}
+</div>
+{% endblock %}

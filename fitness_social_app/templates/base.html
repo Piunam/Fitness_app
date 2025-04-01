@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Social App</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">Fitness Social</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                <a class="nav-item nav-link" href="{% url 'workout_plans' %}">Workout Plans</a>
+                <a class="nav-item nav-link" href="{% url 'social_feed' %}">Social Feed</a>
+            </div>
+            <div class="navbar-nav ml-auto">
+                {% if user.is_authenticated %}
+                    <span class="navbar-text mr-3">Hello, {{ user.username }}!</span>
+                    <a class="nav-item nav-link btn btn-outline-danger btn-sm" href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                    <a class="nav-item nav-link btn btn-outline-primary btn-sm mr-2" href="{% url 'login' %}">Login</a>
+                    <a class="nav-item nav-link btn btn-primary btn-sm" href="#">Sign Up</a> <!-- Add signup URL here -->
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-light text-center py-3 mt-5 border-top">
+        <p>&copy; {{ current_year }} Fitness Social App. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="/static/js/scripts.js"></script>
+
+    <!-- Dynamic Year Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const yearElement = document.querySelector('footer p');
+            const currentYear = new Date().getFullYear();
+            yearElement.innerHTML = `&copy; ${currentYear} Fitness Social App. All rights reserved.`;
+        });
+    </script>
+</body>
+</html>

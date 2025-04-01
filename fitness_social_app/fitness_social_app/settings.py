@@ -133,6 +133,10 @@ LOGIN_REDIRECT_URL = '/'
 # Redirect after logout
 LOGOUT_REDIRECT_URL = '/'
 
+# Redirect after logout
+# LOGOUT_REDIRECT_URL = '/dashboard/'  # Redirect to the dashboard or homepage
+
+
 
 # Media files (Uploaded files)
 MEDIA_URL = '/media/'

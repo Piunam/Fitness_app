@@ -49,12 +49,22 @@ class Progress(models.Model):
         return f"{self.user.username} - {self.workout.name} ({self.completed_on.strftime('%Y-%m-%d')})"
 
 
+# class SocialConnection(models.Model):
+#     follower = models.ForeignKey(User, related_name="follower", on_delete=models.CASCADE)
+#     following = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE)
+
+#     def __str__(self):
+#         return f"{self.follower.username} follows {self.following.username}"
+
 class SocialConnection(models.Model):
     follower = models.ForeignKey(User, related_name="follower", on_delete=models.CASCADE)
     following = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.follower.username} follows {self.following.username}"
+
+
+
 
 
 class Post(models.Model):

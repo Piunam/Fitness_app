@@ -26,10 +26,13 @@
             <div class="navbar-nav ml-auto">
                 {% if user.is_authenticated %}
                     <span class="navbar-text mr-3">Hello, {{ user.username }}!</span>
-                    <a class="nav-item nav-link btn btn-outline-danger btn-sm" href="{% url 'logout' %}">Logout</a>
+                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
+                    </form>
                 {% else %}
                     <a class="nav-item nav-link btn btn-outline-primary btn-sm mr-2" href="{% url 'login' %}">Login</a>
-                    <a class="nav-item nav-link btn btn-primary btn-sm" href="#">Sign Up</a> <!-- Add signup URL here -->
+                    <a class="nav-item nav-link btn btn-primary btn-sm" href="{% url 'signup' %}">Sign Up</a>
                 {% endif %}
             </div>
         </div>

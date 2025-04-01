@@ -8,6 +8,21 @@ from django.db.models import Q
 from django.db.models import Count, Sum
 from django.utils import timezone
 import datetime
+from django.contrib.auth.forms import UserCreationForm
+
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your account has been created! You can now log in.')
+            return redirect('login')  # Redirect to the login page after successful sign-up
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/signup.html', {'form': form})
+
+
 
 @login_required
 def dashboard(request):

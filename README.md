@@ -9,7 +9,7 @@ A Django-based social fitness platform for connecting users with similar fitness
 ---
 
 ## **Features**
-
+ 
 ### **1. User Authentication**
 - Sign Up
 - Login/Logout

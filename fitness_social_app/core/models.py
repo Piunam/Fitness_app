@@ -9,14 +9,25 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s profile"
 
+# class Workout(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     name = models.CharField(max_length=100)
+#     description = models.TextField()
+#     date = models.DateField()
+
+#     def __str__(self):
+#         return f"{self.name} - {self.user.username}"
+
 class Workout(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    date = models.DateField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to the user who created it
+    name = models.CharField(max_length=100)  # Name of the workout plan
+    description = models.TextField()  # Description of the workout plan
+    duration = models.IntegerField(help_text="Duration in minutes")  # Duration of the workout
+    date_created = models.DateTimeField(auto_now_add=True)  # Auto-generated timestamp
 
     def __str__(self):
         return f"{self.name} - {self.user.username}"
+
 
 class Progress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

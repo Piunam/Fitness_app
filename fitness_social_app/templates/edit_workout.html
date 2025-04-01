@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Edit Workout Plan</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Save Changes</button>
+</form>
+<a href="{% url 'workout_plans' %}" class="btn btn-secondary mt-3">Back to Workout Plans</a>
+{% endblock %}

@@ -2,6 +2,7 @@
 
 {% block content %}
 <h1>Workout Plans</h1>
+<a href="{% url 'add_workout' %}" class="btn btn-primary mb-3">Add New Workout</a>
 
 <div class="row">
     {% for workout in workouts %}
@@ -10,7 +11,9 @@
             <div class="card-body">
                 <h5 class="card-title">{{ workout.name }}</h5>
                 <p class="card-text">{{ workout.description }}</p>
-                <a href="#" class="btn btn-primary">Start Workout</a>
+                <p><strong>Duration:</strong> {{ workout.duration }} minutes</p>
+                <a href="{% url 'edit_workout' workout.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{% url 'delete_workout' workout.pk %}" class="btn btn-danger btn-sm">Delete</a>
             </div>
         </div>
     </div>

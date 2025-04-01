@@ -1,24 +1,204 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Welcome, {{ user.username }}</h1>
-<h3>Your Fitness Goal: {{ user.profile.fitness_goal }}</h3>
+<div class="row">
+    <!-- Left column - User info and stats -->
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2>Welcome, {{ user.username }}</h2>
+                <p class="lead">
+                    {% if profile.fitness_goal %}
+                        Your Fitness Goal: {{ profile.fitness_goal }}
+                    {% else %}
+                        <a href="#" class="btn btn-sm btn-outline-primary">Set a fitness goal</a>
+                    {% endif %}
+                </p>
+                
+                <!-- Stats summary -->
+                <div class="mt-4">
+                    <h5>Last 30 Days</h5>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h3>{{ total_workouts }}</h3>
+                            <p>Workouts</p>
+                        </div>
+                        <div class="col-6">
+                            <h3>{{ total_duration }}</h3>
+                            <p>Minutes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick workout log -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Workout Log</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'log_workout' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_workout">Workout</label>
+                        <select name="workout" id="id_workout" class="form-control">
+                            {% for workout in all_workouts %}
+                            <option value="{{ workout.id }}">{{ workout.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_duration">Duration (minutes)</label>
+                        <input type="number" name="duration" id="id_duration" class="form-control" value="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_notes">Notes</label>
+                        <textarea name="notes" id="id_notes" rows="2" class="form-control"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_calories_burned">Calories Burned (optional)</label>
+                        <input type="number" name="calories_burned" id="id_calories_burned" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-success">Log Workout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Middle column - Upcoming workouts and progress -->
+    <div class="col-md-4">
+        <!-- Today's workouts -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Today's Workouts</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for workout in upcoming_workouts %}
+                    {% if workout.date == today %}
+                    <li class="list-group-item">
+                        <h6>{{ workout.name }}</h6>
+                        <p class="mb-0">{{ workout.description }}</p>
+                        <small class="text-muted">{{ workout.duration }} minutes</small>
+                    </li>
+                    {% endif %}
+                    {% empty %}
+                    <li class="list-group-item">No workouts scheduled for today.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Progress chart -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Your Workout Activity</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="workoutChart" width="100%" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right column - Recent progress and connections -->
+    <div class="col-md-4">
+        <!-- Recent progress -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Progress</h5>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for entry in recent_progress|slice:":5" %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">{{ entry.workout.name }}</h6>
+                                <small class="text-muted">{{ entry.completed_on|date:"F j, Y" }}</small>
+                            </div>
+                            <span class="badge badge-primary badge-pill">{{ entry.duration }} min</span>
+                        </div>
+                        {% if entry.notes %}
+                        <small>{{ entry.notes }}</small>
+                        {% endif %}
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No recent progress recorded.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Friends activity -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Friend Activity</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for activity in recent_activities %}
+                    <li class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ activity.user.username }}</h6>
+                            <small>{{ activity.completed_on|timesince }} ago</small>
+                        </div>
+                        <p class="mb-1">Completed {{ activity.workout.name }}</p>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No recent activity from friends.</li>
+                    {% endfor %}
+                </ul>
+                <div class="mt-3">
+                    <a href="{% url 'discover_users' %}" class="btn btn-outline-primary btn-sm">Find Friends</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<h4>Today's Workouts:</h4>
-<ul>
-    {% for workout in workouts %}
-    <li>{{ workout.name }}: {{ workout.description }}</li>
-    {% empty %}
-    <li>No workouts scheduled for today.</li>
-    {% endfor %}
-</ul>
-
-<h4>Recent Progress:</h4>
-<ul>
-    {% for entry in progress %}
-    <li>{{ entry.workout.name }} completed on {{ entry.completed_on }}</li>
-    {% empty %}
-    <li>No recent progress recorded.</li>
-    {% endfor %}
-</ul>
+<!-- Chart.js initialization -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var ctx = document.getElementById('workoutChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Workout Frequency',
+                data: {{ chart_data|safe }},
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+});
+</script>
 {% endblock %}

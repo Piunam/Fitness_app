@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core',
+    # 'core',
+    'core.apps.CoreConfig',  # Not just 'core'
     'rest_framework',
 ]
 
@@ -131,3 +132,8 @@ LOGIN_REDIRECT_URL = '/'
 
 # Redirect after logout
 LOGOUT_REDIRECT_URL = '/'
+
+
+# Media files (Uploaded files)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

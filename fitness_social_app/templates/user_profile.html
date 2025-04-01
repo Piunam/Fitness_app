@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3>{{ profile_user.username }}</h3>
+                {% if profile_user != request.user %}
+                    <a href="{% url 'follow_user' profile_user.username %}" class="btn btn-sm {% if is_following %}btn-secondary{% else %}btn-primary{% endif %}">
+                        {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5>Profile Info</h5>
+                {% if profile_user.profile %}
+                    <p><strong>Fitness Goal:</strong> {{ profile_user.profile.fitness_goal }}</p>
+                    {% if profile_user.profile.bio %}
+                        <p><strong>Bio:</strong> {{ profile_user.profile.bio }}</p>
+                    {% endif %}
+                {% else %}
+                    <p>No profile information available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Posts by {{ profile_user.username }}</h3>
+{% for post in posts %}
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="d-flex align-items-center mb-2">
+            <h5 class="card-title mb-0">{{ profile_user.username }}</h5>
+            <small class="text-muted ml-auto">{{ post.created_at|date:"F j, Y, g:i a" }}</small>
+        </div>
+        <p class="card-text">{{ post.content }}</p>
+        {% if post.image %}
+            <img src="{{ post.image.url }}" class="img-fluid mb-3" alt="Post image">
+        {% endif %}
+        
+        <!-- Like and Comment links -->
+        <div>
+            <a href="{% url 'like_post' post.pk %}?next=social_feed" class="btn btn-sm {% if post.is_liked_by_user %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                {% if post.is_liked_by_user %}
+                    Liked
+                {% else %}
+                    Like
+                {% endif %}
+                ({{ post.likes.count }})
+            </a>
+            <a href="{% url 'post_detail' post.pk %}" class="btn btn-sm btn-outline-secondary">
+                Comments ({{ post.comments.count }})
+            </a>
+        </div>
+    </div>
+</div>
+{% empty %}
+<p>{{ profile_user.username }} hasn't posted anything yet.</p>
+{% endfor %}
+
+<a href="{% url 'social_feed' %}" class="btn btn-secondary mt-3">Back to Feed</a>
+{% endblock %}

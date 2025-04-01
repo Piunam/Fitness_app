@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex align-items-center mb-2">
+            <h5 class="card-title mb-0">
+                <a href="{% url 'user_profile' post.user.username %}">{{ post.user.username }}</a>
+            </h5>
+            <small class="text-muted ml-auto">{{ post.created_at|date:"F j, Y, g:i a" }}</small>
+        </div>
+        <p class="card-text">{{ post.content }}</p>
+        {% if post.image %}
+            <img src="{{ post.image.url }}" class="img-fluid mb-3" alt="Post image">
+        {% endif %}
+        
+        <!-- Like button -->
+        <a href="{% url 'like_post' post.pk %}?next=social_feed" class="btn btn-sm {% if post.is_liked_by_user %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            {% if post.is_liked_by_user %}
+                Liked
+            {% else %}
+                Like
+            {% endif %}
+            ({{ post.likes.count }})
+        </a>
+    </div>
+</div>
+
+<!-- Comments -->
+<h4>Comments ({{ post.comments.count }})</h4>
+{% for comment in post.comments.all %}
+<div class="card mb-2">
+    <div class="card-body py-2">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <strong>{{ comment.user.username }}</strong>
+            <small class="text-muted">{{ comment.created_at|date:"F j, Y, g:i a" }}</small>
+        </div>
+        <p class="mb-0">{{ comment.content }}</p>
+    </div>
+</div>
+{% empty %}
+<p>No comments yet. Be the first to comment!</p>
+{% endfor %}
+
+<!-- Add Comment Form -->
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="card-title">Add a Comment</h5>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Post Comment</button>
+        </form>
+    </div>
+</div>
+
+<a href="{% url 'social_feed' %}" class="btn btn-secondary mt-3">Back to Feed</a>
+{% endblock %}

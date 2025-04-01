@@ -21,6 +21,7 @@
                 <a class="nav-item nav-link" href="{% url 'dashboard' %}">Dashboard</a>
                 <a class="nav-item nav-link" href="{% url 'workout_plans' %}">Workout Plans</a>
                 <a class="nav-item nav-link" href="{% url 'social_feed' %}">Social Feed</a>
+                <a class="nav-item nav-link" href="{% url 'discover_users' %}">Discover People</a>
             </div>
             <div class="navbar-nav ml-auto">
                 {% if user.is_authenticated %}
@@ -60,5 +61,8 @@
             yearElement.innerHTML = `&copy; ${currentYear} Fitness Social App. All rights reserved.`;
         });
     </script>
+    <!-- Add this before the closing </body> tag in base.html -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </body>
 </html>

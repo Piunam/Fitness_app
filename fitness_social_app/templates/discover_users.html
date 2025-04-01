@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Discover People</h1>
+<p class="lead">Find people to follow and connect with</p>
+
+<div class="row">
+    {% for user in users %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ user.username }}</h5>
+                {% if user.profile %}
+                    <p class="card-text"><small>Fitness Goal: {{ user.profile.fitness_goal }}</small></p>
+                {% endif %}
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'user_profile' user.username %}" class="btn btn-sm btn-outline-secondary">View Profile</a>
+                    
+                    {% if user.id in following_ids %}
+                        <a href="{% url 'follow_user' user.username %}" class="btn btn-sm btn-secondary">Unfollow</a>
+                    {% else %}
+                        <a href="{% url 'follow_user' user.username %}" class="btn btn-sm btn-primary">Follow</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p>No users available to follow.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<a href="{% url 'social_feed' %}" class="btn btn-secondary mt-3">Back to Feed</a>
+{% endblock %}

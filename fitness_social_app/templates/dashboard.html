@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Welcome, {{ user.username }}</h1>
+<h3>Your Fitness Goal: {{ user.profile.fitness_goal }}</h3>
+
+<h4>Today's Workouts:</h4>
+<ul>
+    {% for workout in workouts %}
+    <li>{{ workout.name }}: {{ workout.description }}</li>
+    {% empty %}
+    <li>No workouts scheduled for today.</li>
+    {% endfor %}
+</ul>
+
+<h4>Recent Progress:</h4>
+<ul>
+    {% for entry in progress %}
+    <li>{{ entry.workout.name }} completed on {{ entry.completed_on }}</li>
+    {% empty %}
+    <li>No recent progress recorded.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

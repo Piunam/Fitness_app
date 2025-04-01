@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Social Feed</h1>
+
+{% for post in feed_posts %}
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">{{ post.user.username }}</h5>
+        <p class="card-text">Completed {{ post.workout.name }} on {{ post.completed_on }}</p>
+    </div>
+</div>
+{% empty %}
+<p>No recent activity from your connections.</p>
+{% endfor %}
+{% endblock %}

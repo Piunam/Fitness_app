@@ -1,14 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Workout, Progress, SocialConnection, Post, Comment, Like, User, Profile
+from .models import Workout, Progress, SocialConnection, Post, Comment, Like, User, Profile, Streak, Achievement, Challenge, ChallengeParticipation
 from django.contrib.auth.models import User
 from .forms import WorkoutForm, PostForm, CommentForm, ProgressForm
 from django.db.models import Q
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, Exists, OuterRef
 from django.utils import timezone
 import datetime
 from django.contrib.auth.forms import UserCreationForm
+import random
+
+
+
 
 
 def signup(request):
@@ -65,6 +69,29 @@ def dashboard(request):
     chart_labels = [item['workout__name'] for item in workout_categories]
     chart_data = [item['count'] for item in workout_categories]
     
+    
+    # Add motivation features
+    try:
+        streak = Streak.objects.get(user=request.user)
+    except Streak.DoesNotExist:
+        streak = Streak.objects.create(user=request.user)
+    
+    achievements = Achievement.objects.filter(user=request.user).order_by('-unlocked_at')[:3]
+    active_challenges = Challenge.objects.filter(
+        participants=request.user,
+        challengeparticipation__completed=False
+    )
+    
+    
+    # Motivational messages
+    MOTIVATION_PHRASES = [
+        "Every rep counts! 💪",
+        "Consistency is key! 🔑",
+        "You're stronger than you think! 💥",
+        "Progress, not perfection! 📈"
+    ]
+    
+    
     return render(request, 'dashboard.html', {
         'profile': profile,
         'upcoming_workouts': upcoming_workouts,
@@ -74,8 +101,18 @@ def dashboard(request):
         'recent_activities': recent_activities,
         'all_workouts': all_workouts,
         'chart_labels': chart_labels,
-        'chart_data': chart_data
+        'chart_data': chart_data,
+        'streak': streak,
+        'achievements': achievements,
+        'active_challenges': active_challenges,
+        'motivation_phrase': random.choice(MOTIVATION_PHRASES)
     })
+
+
+
+
+
+
 
 
 
@@ -325,3 +362,20 @@ def follow_user(request, username):
         messages.success(request, f"You have unfollowed {username}.")
 
     return redirect('discover_users')
+
+
+
+@login_required
+def achievements_list(request):
+    achievements = Achievement.objects.filter(user=request.user).order_by('-unlocked_at')
+    return render(request, 'achievements.html', {'achievements': achievements})
+
+@login_required
+def challenges_list(request):
+    all_challenges = Challenge.objects.annotate(
+        is_joined=Exists(ChallengeParticipation.objects.filter(
+            user=request.user,
+            challenge=OuterRef('pk')
+        ))
+    )
+    return render(request, 'challenges.html', {'challenges': all_challenges})

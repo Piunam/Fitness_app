@@ -17,9 +17,13 @@ urlpatterns = [
     path('profile/<str:username>/', views.user_profile, name='user_profile'),
     path('profile/<str:username>/follow/', views.follow_user, name='follow_user'),
     path('discover/', views.discover_users, name='discover_users'),
+
+    path('achievements/', views.achievements_list, name='achievements'),
+    path('challenges/', views.challenges_list, name='challenges'),
     
     path('signup/', views.signup, name='signup'),
     path('logout/', auth_views.LogoutView.as_view(template_name='registration/logout.html'), name='logout'),
 ]
+
 
 

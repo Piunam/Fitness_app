@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -101,3 +102,45 @@ class Like(models.Model):
         
     def __str__(self):
         return f"{self.user.username} likes {self.post.id}"
+
+
+
+
+class Achievement(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    icon = models.CharField(max_length=50)  # FontAwesome class names
+    unlocked_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.name}"
+
+class Streak(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    current_streak = models.PositiveIntegerField(default=0)
+    last_activity = models.DateField(auto_now=True)
+
+    def update_streak(self):
+        if (timezone.now().date() - self.last_activity).days == 1:
+            self.current_streak += 1
+        elif (timezone.now().date() - self.last_activity).days > 1:
+            self.current_streak = 1
+        self.last_activity = timezone.now().date()
+        self.save()
+
+class Challenge(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    duration = models.PositiveIntegerField(help_text="Duration in days")
+    start_date = models.DateField(auto_now_add=True)
+    participants = models.ManyToManyField(User, through='ChallengeParticipation')
+
+    def __str__(self):
+        return self.title
+
+class ChallengeParticipation(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
+    progress = models.PositiveIntegerField(default=0)
+    completed = models.BooleanField(default=False)

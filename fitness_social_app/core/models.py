@@ -10,15 +10,6 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s profile"
 
-# class Workout(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     name = models.CharField(max_length=100)
-#     description = models.TextField()
-#     date = models.DateField()
-
-#     def __str__(self):
-#         return f"{self.name} - {self.user.username}"
-
 class Workout(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to the user who created it
     name = models.CharField(max_length=100)  # Name of the workout plan
@@ -28,15 +19,6 @@ class Workout(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.user.username}"
-
-
-# class Progress(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     workout = models.ForeignKey(Workout, on_delete=models.CASCADE)
-#     completed_on = models.DateTimeField(auto_now_add=True)
-
-#     def __str__(self):
-#         return f"{self.user.username} - {self.workout.name} - {self.completed_on}"
 
 class Progress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='progress_entries')
@@ -49,23 +31,12 @@ class Progress(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.workout.name} ({self.completed_on.strftime('%Y-%m-%d')})"
 
-
-# class SocialConnection(models.Model):
-#     follower = models.ForeignKey(User, related_name="follower", on_delete=models.CASCADE)
-#     following = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE)
-
-#     def __str__(self):
-#         return f"{self.follower.username} follows {self.following.username}"
-
 class SocialConnection(models.Model):
     follower = models.ForeignKey(User, related_name="follower", on_delete=models.CASCADE)
     following = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.follower.username} follows {self.following.username}"
-
-
-
 
 
 class Post(models.Model):
@@ -132,15 +103,37 @@ class Streak(models.Model):
 class Challenge(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
+    goal = models.IntegerField(help_text="Target number of workouts to complete")
     duration = models.PositiveIntegerField(help_text="Duration in days")
     start_date = models.DateField(auto_now_add=True)
+    end_date = models.DateField(null=True, blank=True)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_challenges')
     participants = models.ManyToManyField(User, through='ChallengeParticipation')
-
+    
     def __str__(self):
         return self.title
+    
+    @property
+    def is_active(self):
+        today = timezone.now().date()
+        return (not self.end_date) or (today <= self.end_date)
 
 class ChallengeParticipation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
+    joined_date = models.DateTimeField(auto_now_add=True)
     progress = models.PositiveIntegerField(default=0)
     completed = models.BooleanField(default=False)
+    
+    class Meta:
+        unique_together = ('user', 'challenge')
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.challenge.title}"
+    
+    @property
+    def progress_percentage(self):
+        if self.challenge.goal == 0:
+            return 0
+        return min(int((self.progress / self.challenge.goal) * 100), 100)
+

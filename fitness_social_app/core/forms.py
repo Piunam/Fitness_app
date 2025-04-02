@@ -1,5 +1,5 @@
 from django import forms
-from .models import Workout, Post, Comment, Progress
+from .models import Workout, Post, Comment, Progress, Challenge
 
 class WorkoutForm(forms.ModelForm):
     class Meta:
@@ -35,3 +35,16 @@ class ProgressForm(forms.ModelForm):
         widgets = {
             'notes': forms.Textarea(attrs={'rows': 2, 'cols': 30}),
         }
+
+
+class ChallengeForm(forms.ModelForm):
+    class Meta:
+        model = Challenge
+        fields = ['title', 'description', 'goal', 'duration', 'end_date']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 4}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+class JoinChallengeForm(forms.Form):
+    challenge_id = forms.IntegerField(widget=forms.HiddenInput())

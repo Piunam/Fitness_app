@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Workout, Progress, SocialConnection, Post, Comment, Like, User, Profile, Streak, Achievement, Challenge, ChallengeParticipation
 from django.contrib.auth.models import User
-from .forms import WorkoutForm, PostForm, CommentForm, ProgressForm
+from .forms import WorkoutForm, PostForm, CommentForm, ProgressForm, ChallengeForm
 from django.db.models import Q
 from django.db.models import Count, Sum, Exists, OuterRef
 from django.utils import timezone
@@ -109,13 +109,6 @@ def dashboard(request):
     })
 
 
-
-
-
-
-
-
-
 @login_required
 def log_workout(request):
     if request.method == 'POST':
@@ -124,23 +117,27 @@ def log_workout(request):
             progress = form.save(commit=False)
             progress.user = request.user
             progress.save()
+            
+            # Update active challenges
+            active_participations = ChallengeParticipation.objects.filter(
+                user=request.user,
+                completed=False
+            )
+            
+            for participation in active_participations:
+                if participation.challenge.is_active:
+                    participation.progress += 1
+                    if participation.progress >= participation.challenge.goal:
+                        participation.completed = True
+                        messages.success(
+                            request, 
+                            f"Congratulations! You've completed the '{participation.challenge.title}' challenge!"
+                        )
+                    participation.save()
+            
             return redirect('dashboard')
     return redirect('dashboard')
 
-
-
-
-# @login_required
-# def dashboard(request):
-#     user_workouts = Workout.objects.filter(user=request.user)
-#     user_progress = Progress.objects.filter(user=request.user)
-#     return render(request, 'dashboard.html', {'workouts': user_workouts, 'progress': user_progress})
-
-
-# @login_required
-# def workout_plans(request):
-#     all_workouts = Workout.objects.all()
-#     return render(request, 'workout_plans.html', {'workouts': all_workouts})
 
 @login_required
 def workout_plans(request):
@@ -268,45 +265,6 @@ def user_profile(request, username):
         'is_following': is_following
     })
 
-# @login_required
-# def follow_user(request, username):
-#     user_to_follow = get_object_or_404(User, username=username)
-    
-#     # Don't allow users to follow themselves
-#     if request.user == user_to_follow:
-#         messages.error(request, "You cannot follow yourself.")
-#         return redirect('user_profile', username=username)
-    
-#     # Check if already following
-#     connection, created = SocialConnection.objects.get_or_create(
-#         follower=request.user,
-#         following=user_to_follow
-#     )
-    
-#     if created:
-#         messages.success(request, f"You are now following {username}.")
-#     else:
-#         # User already follows, so unfollow
-#         connection.delete()
-#         messages.success(request, f"You have unfollowed {username}.")
-    
-#     return redirect('user_profile', username=username)
-
-# @login_required
-# def discover_users(request):
-#     # Get all users except the current user
-#     users = User.objects.exclude(id=request.user.id)
-    
-#     # Get the users that the current user is following
-#     following = SocialConnection.objects.filter(follower=request.user).values_list('following', flat=True)
-    
-#     return render(request, 'discover_users.html', {
-#         'users': users,
-#         'following': following
-#     })
-    
-    
-
 
 @login_required
 def discover_users(request):
@@ -370,12 +328,123 @@ def achievements_list(request):
     achievements = Achievement.objects.filter(user=request.user).order_by('-unlocked_at')
     return render(request, 'achievements.html', {'achievements': achievements})
 
+
 @login_required
 def challenges_list(request):
-    all_challenges = Challenge.objects.annotate(
-        is_joined=Exists(ChallengeParticipation.objects.filter(
+    # Get all challenges
+    all_challenges = Challenge.objects.all().order_by('-start_date')
+    
+    # Mark which challenges the user has joined
+    for challenge in all_challenges:
+        challenge.user_joined = ChallengeParticipation.objects.filter(
+            user=request.user, 
+            challenge=challenge
+        ).exists()
+        
+        if challenge.user_joined:
+            participation = ChallengeParticipation.objects.get(
+                user=request.user, 
+                challenge=challenge
+            )
+            challenge.user_progress = participation.progress
+            challenge.user_progress_percentage = participation.progress_percentage
+    
+    # Sort challenges: user's active challenges first
+    user_active = [c for c in all_challenges if c.user_joined and c.is_active]
+    other_active = [c for c in all_challenges if not c.user_joined and c.is_active]
+    completed = [c for c in all_challenges if c.user_joined and not c.is_active]
+    
+    context = {
+        'user_active_challenges': user_active,
+        'other_active_challenges': other_active,
+        'completed_challenges': completed,
+    }
+    
+    return render(request, 'challenges.html', context)
+
+@login_required
+def create_challenge(request):
+    if request.method == 'POST':
+        form = ChallengeForm(request.POST)
+        if form.is_valid():
+            challenge = form.save(commit=False)
+            challenge.creator = request.user
+            challenge.save()
+            
+            # Creator automatically joins their own challenge
+            ChallengeParticipation.objects.create(
+                user=request.user,
+                challenge=challenge
+            )
+            
+            messages.success(request, "Challenge created successfully!")
+            return redirect('challenges')
+    else:
+        form = ChallengeForm()
+    
+    return render(request, 'create_challenge.html', {'form': form})
+
+@login_required
+def join_challenge(request, challenge_id):
+    challenge = get_object_or_404(Challenge, pk=challenge_id)
+    
+    if not challenge.is_active:
+        messages.error(request, "This challenge is no longer active.")
+        return redirect('challenges')
+    
+    # Check if user already joined
+    already_joined = ChallengeParticipation.objects.filter(
+        user=request.user,
+        challenge=challenge
+    ).exists()
+    
+    if already_joined:
+        messages.info(request, "You are already participating in this challenge.")
+    else:
+        ChallengeParticipation.objects.create(
             user=request.user,
-            challenge=OuterRef('pk')
-        ))
+            challenge=challenge
+        )
+        messages.success(request, f"You've joined the '{challenge.title}' challenge!")
+    
+    return redirect('challenges')
+
+@login_required
+def leave_challenge(request, challenge_id):
+    challenge = get_object_or_404(Challenge, pk=challenge_id)
+    participation = get_object_or_404(
+        ChallengeParticipation, 
+        user=request.user,
+        challenge=challenge
     )
-    return render(request, 'challenges.html', {'challenges': all_challenges})
+    
+    if request.method == 'POST':
+        participation.delete()
+        messages.success(request, f"You've left the '{challenge.title}' challenge.")
+        return redirect('challenges')
+    
+    return render(request, 'leave_challenge.html', {'challenge': challenge})
+
+@login_required
+def update_challenge_progress(request, challenge_id):
+    challenge = get_object_or_404(Challenge, pk=challenge_id)
+    participation = get_object_or_404(
+        ChallengeParticipation, 
+        user=request.user,
+        challenge=challenge
+    )
+    
+    if request.method == 'POST':
+        # Increment progress by 1
+        participation.progress += 1
+        
+        # Check if challenge is completed
+        if participation.progress >= challenge.goal:
+            participation.completed = True
+            messages.success(request, f"Congratulations! You've completed the '{challenge.title}' challenge!")
+        else:
+            messages.success(request, f"Progress updated for '{challenge.title}' challenge!")
+            
+        participation.save()
+    
+    return redirect('challenges')

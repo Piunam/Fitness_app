@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+fitness_social_app/backup.json
 
 # C extensions
 *.so

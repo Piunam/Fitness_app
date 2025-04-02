@@ -6,3 +6,13 @@ body {
 .navbar {
     margin-bottom: 20px;
 }
+
+/* Challenge cards styling */
+.progress {
+    height: 20px;
+}
+
+.progress-bar {
+    font-size: 0.8rem;
+    line-height: 20px;
+}

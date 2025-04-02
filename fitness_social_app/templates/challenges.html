@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Fitness Challenges</h1>
+        <a href="{% url 'create_challenge' %}" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Create Challenge
+        </a>
+    </div>
+
+    <!-- User's Active Challenges -->
+    <h2>Your Active Challenges</h2>
+    <div class="row mb-4">
+        {% for challenge in user_active_challenges %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ challenge.title }}</h5>
+                    <p class="card-text">{{ challenge.description }}</p>
+                    <p><strong>Goal:</strong> {{ challenge.goal }} workouts</p>
+                    <p><strong>Duration:</strong> {{ challenge.duration }} days</p>
+                    
+                    <!-- Progress Bar -->
+                    <div class="progress mb-3">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ challenge.user_progress_percentage }}%;" 
+                             aria-valuenow="{{ challenge.user_progress_percentage }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {{ challenge.user_progress }}/{{ challenge.goal }}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <form method="post" action="{% url 'update_challenge_progress' challenge.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="fa-solid fa-plus"></i> Log Progress
+                            </button>
+                        </form>
+                        
+                        <a href="{% url 'leave_challenge' challenge.id %}" class="btn btn-outline-danger btn-sm">
+                            <i class="fa-solid fa-sign-out-alt"></i> Leave
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                You haven't joined any challenges yet. Join one to track your progress and stay motivated!
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Other Active Challenges -->
+    <h2>Available Challenges</h2>
+    <div class="row mb-4">
+        {% for challenge in other_active_challenges %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ challenge.title }}</h5>
+                    <p class="card-text">{{ challenge.description }}</p>
+                    <p><strong>Goal:</strong> {{ challenge.goal }} workouts</p>
+                    <p><strong>Duration:</strong> {{ challenge.duration }} days</p>
+                    <p><small class="text-muted">Created by: {{ challenge.creator.username }}</small></p>
+                    
+                    <a href="{% url 'join_challenge' challenge.id %}" class="btn btn-primary">
+                        <i class="fa-solid fa-user-plus"></i> Join Challenge
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No other active challenges available. Why not create one?
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Completed Challenges -->
+    {% if completed_challenges %}
+    <h2>Completed Challenges</h2>
+    <div class="row">
+        {% for challenge in completed_challenges %}
+        <div class="col-md-4 mb-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">{{ challenge.title }}</h5>
+                    <p class="card-text">{{ challenge.description }}</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%;">
+                            {{ challenge.user_progress }}/{{ challenge.goal }}
+                        </div>
+                    </div>
+                    <span class="badge badge-success">Completed!</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

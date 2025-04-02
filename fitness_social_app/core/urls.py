@@ -20,10 +20,15 @@ urlpatterns = [
 
     path('achievements/', views.achievements_list, name='achievements'),
     path('challenges/', views.challenges_list, name='challenges'),
+    path('challenges/create/', views.create_challenge, name='create_challenge'),
+    path('challenges/<int:challenge_id>/join/', views.join_challenge, name='join_challenge'),
+    path('challenges/<int:challenge_id>/leave/', views.leave_challenge, name='leave_challenge'),
+    path('challenges/<int:challenge_id>/progress/', views.update_challenge_progress, name='update_challenge_progress'),
     
     path('signup/', views.signup, name='signup'),
     path('logout/', auth_views.LogoutView.as_view(template_name='registration/logout.html'), name='logout'),
 ]
+
 
 
 

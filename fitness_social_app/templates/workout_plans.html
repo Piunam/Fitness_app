@@ -1,24 +1,126 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Workout Plans</h1>
-<a href="{% url 'add_workout' %}" class="btn btn-primary mb-3">Add New Workout</a>
+<style>
+  body {
+    background-color: #f3f6f9;
+  }
+
+  .page-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-top: 20px;
+    margin-bottom: 30px;
+  }
+
+  .add-btn {
+    display: block;
+    margin: 0 auto 40px auto;
+    padding: 12px 25px;
+    font-size: 1rem;
+    font-weight: 500;
+    background: linear-gradient(135deg, #00c9ff, #92fe9d);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    text-align: center;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+
+  .add-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+    color: #fff;
+  }
+
+  .card {
+    border: none;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    height: 100%;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.15);
+  }
+
+  .card-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #34495e;
+  }
+
+  .card-text {
+    color: #7f8c8d;
+    margin-bottom: 10px;
+  }
+
+  .duration {
+    font-weight: 500;
+    color: #2c3e50;
+  }
+
+  .btn-sm {
+    margin-right: 10px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 6px;
+  }
+
+  .btn-warning {
+    background-color: #f39c12;
+    border: none;
+    color: #fff;
+  }
+
+  .btn-warning:hover {
+    background-color: #e67e22;
+  }
+
+  .btn-danger {
+    background-color: #e74c3c;
+    border: none;
+  }
+
+  .btn-danger:hover {
+    background-color: #c0392b;
+  }
+
+  .no-workouts {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #95a5a6;
+    margin-top: 50px;
+  }
+</style>
+
+<h1 class="page-title">🏋️‍♂️ Workout Plans</h1>
+<a href="{% url 'add_workout' %}" class="add-btn">➕ Add New Workout</a>
 
 <div class="row">
     {% for workout in workouts %}
-    <div class="col-md-4 mb-4">
-        <div class="card">
-            <div class="card-body">
+    <div class="col-md-4 mb-4 d-flex">
+        <div class="card w-100">
+            <div class="card-body d-flex flex-column">
                 <h5 class="card-title">{{ workout.name }}</h5>
                 <p class="card-text">{{ workout.description }}</p>
-                <p><strong>Duration:</strong> {{ workout.duration }} minutes</p>
-                <a href="{% url 'edit_workout' workout.pk %}" class="btn btn-warning btn-sm">Edit</a>
-                <a href="{% url 'delete_workout' workout.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                <p class="duration">⏱ <strong>Duration:</strong> {{ workout.duration }} minutes</p>
+                <div class="mt-auto">
+                    <a href="{% url 'edit_workout' workout.pk %}" class="btn btn-warning btn-sm">✏️ Edit</a>
+                    <a href="{% url 'delete_workout' workout.pk %}" class="btn btn-danger btn-sm">🗑 Delete</a>
+                </div>
             </div>
         </div>
     </div>
     {% empty %}
-    <p>No workout plans available.</p>
+    <p class="no-workouts">No workout plans available. Time to start lifting! 💪</p>
     {% endfor %}
 </div>
 {% endblock %}

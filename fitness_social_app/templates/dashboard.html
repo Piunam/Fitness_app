@@ -1,256 +1,445 @@
 {% extends 'base.html' %}
 
+{% block extra_css %}
+<style>
+  :root {
+    --primary-color: #2c3e50;
+    --secondary-color: #2980b9;
+    --accent-color: #3498db;
+    --light-bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --hover-bg: #ecf0f1;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --transition-speed: 0.3s;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f4f7fa 0%, #e9eff5 100%);
+    color: var(--primary-color);
+    margin: 0;
+    padding: 0;
+  }
+
+  .dashboard-container {
+    padding: 2rem;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px var(--shadow-color);
+    height: 100%;
+    position: sticky;
+    top: 2rem;
+  }
+
+  .sidebar-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+  }
+
+  .sidebar .nav-link {
+    color: #7f8c8d;
+    font-weight: 500;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    transition: background var(--transition-speed) ease, padding var(--transition-speed) ease;
+    display: block;
+  }
+
+  .sidebar .nav-link:hover,
+  .sidebar .nav-link.active {
+    color: var(--primary-color);
+    background: var(--hover-bg);
+    padding-left: 1.25rem;
+  }
+
+  .sidebar i {
+    margin-right: 8px;
+  }
+
+  /* Main Content */
+  .main-content {
+    padding-left: 2rem;
+  }
+
+  /* Cards */
+  .card {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    margin-bottom: 2rem;
+    background: var(--card-bg);
+    transition: transform var(--transition-speed);
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+  }
+
+  .card-header {
+    background: #fafafa;
+    border-bottom: 1px solid #ececec;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  h2, h5, h6 {
+    color: var(--primary-color);
+  }
+
+  .text-primary {
+    color: var(--secondary-color) !important;
+  }
+
+  .lead {
+    font-size: 1.05rem;
+    color: #7f8c8d;
+  }
+
+  /* Buttons */
+  .btn-primary, .btn-success, .btn-outline-primary {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background-color var(--transition-speed) ease;
+  }
+
+  .btn-primary {
+    background-color: var(--secondary-color);
+    border: none;
+  }
+
+  .btn-primary:hover {
+    background-color: #2471a3;
+  }
+
+  .btn-success {
+    background-color: #27ae60;
+    border: none;
+  }
+
+  .btn-success:hover {
+    background-color: #239b56;
+  }
+
+  .btn-outline-primary {
+    background-color: transparent;
+    border: 1px solid var(--secondary-color);
+    color: var(--secondary-color);
+  }
+
+  .btn-outline-primary:hover {
+    background-color: var(--hover-bg);
+  }
+
+  /* List Group */
+  .list-group-item {
+    border: none;
+    border-bottom: 1px solid #e6e6e6;
+    padding: 0.85rem 1rem;
+  }
+
+  .list-group-item:last-child {
+    border-bottom: none;
+  }
+
+  /* Chart */
+  .chart-container {
+    position: relative;
+    height: 300px;
+    background: #fafafa;
+    border-radius: 12px;
+    padding: 1rem;
+  }
+
+  /* Progress */
+  .progress {
+    height: 12px;
+    border-radius: 10px;
+    background-color: var(--hover-bg);
+  }
+
+  .progress-bar {
+    background-color: var(--accent-color);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* Responsive */
+  @media (max-width: 767px) {
+    .main-content {
+      padding-left: 0;
+      margin-top: 2rem;
+    }
+    .dashboard-container {
+      padding: 1rem;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row">
-    <!-- Left column - User info and stats -->
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-body">
-                <h2>Welcome, {{ user.username }}</h2>
-                <p class="lead">
-                    {% if profile.fitness_goal %}
-                        Your Fitness Goal: {{ profile.fitness_goal }}
-                    {% else %}
-                        <a href="#" class="btn btn-sm btn-outline-primary">Set a fitness goal</a>
-                    {% endif %}
-                </p>
-                
-                <!-- Stats summary -->
-                <div class="mt-4">
-                    <h5>Last 30 Days</h5>
-                    <div class="row text-center">
-                        <div class="col-6">
-                            <h3>{{ total_workouts }}</h3>
-                            <p>Workouts</p>
-                        </div>
-                        <div class="col-6">
-                            <h3>{{ total_duration }}</h3>
-                            <p>Minutes</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Streak Counter -->
-        <div class="card mb-4 text-center">
-            <div class="card-body">
-                <h5><i class="fa-solid fa-fire"></i> Current Streak</h5>
-                <h2 class="text-primary">{{ streak.current_streak }}</h2>
-                <small class="text-muted">Day streak</small>
-            </div>
-        </div>
-
-        <!-- Quick workout log -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Quick Workout Log</h5>
-            </div>
-            <div class="card-body">
-                <form method="post" action="{% url 'log_workout' %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="id_workout">Workout</label>
-                        <select name="workout" id="id_workout" class="form-control">
-                            {% for workout in all_workouts %}
-                            <option value="{{ workout.id }}">{{ workout.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_duration">Duration (minutes)</label>
-                        <input type="number" name="duration" id="id_duration" class="form-control" value="30">
-                    </div>
-                    <div class="form-group">
-                        <label for="id_notes">Notes</label>
-                        <textarea name="notes" id="id_notes" rows="2" class="form-control"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-success">Log Workout</button>
-                </form>
-            </div>
-        </div>
+<div class="dashboard-container container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 col-lg-2">
+      <div class="sidebar">
+        <h4 class="sidebar-title">Dashboard</h4>
+        <ul class="nav flex-column">
+          <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link"><i class="fa-solid fa-house"></i> Home</a></li>
+          <li class="nav-item"><a href="{% url 'log_workout' %}" class="nav-link"><i class="fa-solid fa-dumbbell"></i> Log Workout</a></li>
+          <li class="nav-item"><a href="{% url 'workout_plans' %}" class="nav-link"><i class="fa-solid fa-calendar-check"></i> Workout Plans</a></li>
+          <li class="nav-item"><a href="{% url 'social_feed' %}" class="nav-link"><i class="fa-solid fa-users"></i> Social Feed</a></li>
+          <li class="nav-item"><a href="{% url 'discover_users' %}" class="nav-link"><i class="fa-solid fa-user-plus"></i> Discover People</a></li>
+          <li class="nav-item"><a href="{% url 'challenges' %}" class="nav-link"><i class="fa-solid fa-flag-checkered"></i> Challenges</a></li>
+        </ul>
+      </div>
     </div>
-
-    <!-- Middle column - Upcoming workouts and progress -->
-    <div class="col-md-4">
-        <!-- Today's workouts -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Today's Workouts</h5>
-            </div>
+    
+    <!-- Main Content -->
+    <div class="col-md-9 col-lg-10 main-content">
+      <div class="row">
+        <!-- Left Column: User Info & Quick Log -->
+        <div class="col-lg-4">
+          <!-- User Info & Stats Card -->
+          <div class="card">
             <div class="card-body">
-                <ul class="list-group">
-                    {% for workout in upcoming_workouts %}
-                    {% if workout.date_created|date:"Y-m-d" == today|date:"Y-m-d" %}
-                    <li class="list-group-item">
-                        <h6>{{ workout.name }}</h6>
-                        <p class="mb-0">{{ workout.description }}</p>
-                        <small class="text-muted">{{ workout.duration }} minutes</small>
-                    </li>
-                    {% endif %}
-                    {% empty %}
-                    <li class="list-group-item">No workouts scheduled for today.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-
-        <!-- Progress chart -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5>Your Workout Activity</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="workoutChart" width="100%" height="300"></canvas>
-            </div>
-        </div>
-
-        <!-- Motivation Phrase -->
-        <div class="card bg-light text-center mb-4">
-            <div class="card-body">
-                <h5>Daily Motivation</h5>
-                <p>{{ motivation_phrase }}</p>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Right column - Achievements and Friend Activity -->
-    <div class="col-md-4">
-
-        <!-- Achievements -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5>Recent Achievements</h5>
-                {% if achievements %}
+              <h2>Welcome, {{ user.username }}</h2>
+              <p class="lead">
+                {% if profile.fitness_goal %}
+                  Your Fitness Goal: {{ profile.fitness_goal }}
                 {% else %}
+                  <a href="#" class="btn btn-sm btn-outline-primary">Set a fitness goal</a>
                 {% endif %}
+              </p>
+              <div class="mt-4">
+                <h5>Last 30 Days</h5>
+                <div class="row text-center">
+                  <div class="col-6">
+                    <h3>{{ total_workouts }}</h3>
+                    <p>Workouts</p>
+                  </div>
+                  <div class="col-6">
+                    <h3>{{ total_duration }}</h3>
+                    <p>Minutes</p>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
 
-            <!-- Achievements Content -->
+          <!-- Streak Counter Card -->
+          <div class="card text-center">
+            <div class="card-body">
+              <h5><i class="fa-solid fa-fire"></i> Current Streak</h5>
+              <h2 class="text-primary">{{ streak.current_streak }}</h2>
+              <small class="text-muted">Day streak</small>
+            </div>
+          </div>
+
+          <!-- Quick Workout Log Card -->
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Quick Workout Log</h5>
+            </div>
+            <div class="card-body">
+              <form method="post" action="{% url 'log_workout' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="id_workout">Workout</label>
+                  <select name="workout" id="id_workout" class="form-control">
+                    {% for workout in all_workouts %}
+                      <option value="{{ workout.id }}">{{ workout.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="id_duration">Duration (minutes)</label>
+                  <input type="number" name="duration" id="id_duration" class="form-control" value="30">
+                </div>
+                <div class="form-group">
+                  <label for="id_notes">Notes</label>
+                  <textarea name="notes" id="id_notes" rows="2" class="form-control"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Log Workout</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Middle Column: Workouts & Progress -->
+        <div class="col-lg-4">
+          <!-- Today's Workouts Card -->
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Today's Workouts</h5>
+            </div>
+            <div class="card-body">
+              <ul class="list-group">
+                {% for workout in upcoming_workouts %}
+                  {% if workout.date_created|date:"Y-m-d" == today|date:"Y-m-d" %}
+                    <li class="list-group-item">
+                      <h6>{{ workout.name }}</h6>
+                      <p class="mb-0">{{ workout.description }}</p>
+                      <small class="text-muted">{{ workout.duration }} minutes</small>
+                    </li>
+                  {% endif %}
+                {% empty %}
+                  <li class="list-group-item">No workouts scheduled for today.</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+
+          <!-- Progress Chart Card -->
+          <div class="card">
+            <div class="card-header">
+              <h5>Your Workout Activity</h5>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="workoutChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Motivation Card -->
+          <div class="card bg-light text-center">
+            <div class="card-body">
+              <h5>Daily Motivation</h5>
+              <p>{{ motivation_phrase }}</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Column: Achievements & Friend Activity -->
+        <div class="col-lg-4">
+          <!-- Achievements Card -->
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5>Recent Achievements</h5>
+            </div>
             {% if achievements %}
-            {% for achievement in achievements %}
-              {{achievement.name}}
-              {{achievement.description}}
-              {{achivement.icon}}
-              {{achivement.unlocked_at}}
-              
-              {%endfor%}
               <div class="card-body">
                 <div class="row">
-                    {% for achievement in achievements %}
+                  {% for achievement in achievements %}
                     <div class="col-4 text-center">
-                        <i class="{{ achievement.icon }} fa-2x text-warning"></i>
-                        <p class="mt-2 mb-0"><small>{{ achievement.name }}</small></p>
-                        <small class="text-muted">{{ achievement.unlocked_at|date:"M j, Y" }}</small>
+                      <i class="{{ achievement.icon }} fa-2x text-warning"></i>
+                      <p class="mt-2 mb-0"><small>{{ achievement.name }}</small></p>
+                      <small class="text-muted">{{ achievement.unlocked_at|date:"M j, Y" }}</small>
                     </div>
-                    {% endfor %}
+                  {% endfor %}
                 </div>
-            </div>
+              </div>
             {% else %}
-            <div class="card-body">
+              <div class="card-body">
                 <p class="text-muted">No achievements yet. Keep working out to unlock achievements!</p>
-            </div>
+              </div>
             {% endif %}
-        </div>
+          </div>
 
-        <!-- Friend Activity -->
-        <div class="card mb-4">
+          <!-- Friend Activity Card -->
+          <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5>Friend Activity</h5>
-                <a href="{% url 'discover_users' %}" class="btn btn-sm btn-outline-primary">Find Friends</a>
+              <h5>Friend Activity</h5>
+              <a href="{% url 'discover_users' %}" class="btn btn-sm btn-outline-primary">Find Friends</a>
             </div>
             <div class="card-body">
-                <ul class="list-group">
-                    {% for activity in recent_activities %}
-                    <li class="list-group-item">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h6>{{ activity.user.username }}</h6>
-                            <small>{{ activity.completed_on|timesince }} ago</small>
-                        </div>
-                        <p class="mb-0">Completed {{ activity.workout.name }}</p>
-                    </li>
-                    {% empty %}
-                    <li class="list-group-item">No recent activity from friends.</li>
-                    {% endfor %}
-                </ul>
+              <ul class="list-group">
+                {% for activity in recent_activities %}
+                  <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <h6>{{ activity.user.username }}</h6>
+                      <small>{{ activity.completed_on|timesince }} ago</small>
+                    </div>
+                    <p class="mb-0">Completed {{ activity.workout.name }}</p>
+                  </li>
+                {% empty %}
+                  <li class="list-group-item">No recent activity from friends.</li>
+                {% endfor %}
+              </ul>
             </div>
-        </div>
+          </div>
 
-        <!-- Active Challenges -->
-        <div class="card mb-4">
+          <!-- Active Challenges Card -->
+          <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Active Challenges</h5>
-                <a href="{% url 'challenges' %}" class="btn btn-sm btn-outline-primary">View All</a>
+              <h5 class="mb-0">Active Challenges</h5>
+              <a href="{% url 'challenges' %}" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
             <div class="card-body">
-                {% if active_challenges %}
+              {% if active_challenges %}
                 <ul class="list-group">
-                    {% for challenge in active_challenges %}
+                  {% for challenge in active_challenges %}
                     <li class="list-group-item">
-                        <h6>{{ challenge.title }}</h6>
-                        <div class="progress mt-2">
-                            <div class="progress-bar" role="progressbar" 
-                                style="width: {{ challenge.participation.progress_percentage }}%;" 
-                                aria-valuenow="{{ challenge.participation.progress_percentage }}" 
-                                aria-valuemin="0" 
-                                aria-valuemax="100">
-                                {{ challenge.participation.progress }}/{{ challenge.goal }}
-                            </div>
+                      <h6>{{ challenge.title }}</h6>
+                      <div class="progress mt-2">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ challenge.participation.progress_percentage }}%;" 
+                             aria-valuenow="{{ challenge.participation.progress_percentage }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                          {{ challenge.participation.progress }}/{{ challenge.goal }}
                         </div>
+                      </div>
                     </li>
-                    {% endfor %}
+                  {% endfor %}
                 </ul>
-                {% else %}
-                <p class="text-muted">No active challenges. <a href="{% url 'challenges' %}">Join one to stay motivated!</a></p>
-                {% endif %}
+              {% else %}
+                <p class="text-muted">
+                  No active challenges. <a href="{% url 'challenges' %}">Join one to stay motivated!</a>
+                </p>
+              {% endif %}
             </div>
+          </div>
         </div>
-    </div> <!-- End of Right Column -->
-</div> <!-- End of Row -->
+      </div><!-- End Main Content Row -->
+    </div><!-- End Main Content Column -->
+  </div><!-- End Row -->
+</div><!-- End Dashboard Container -->
 
 <!-- Chart.js Initialization -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {
     var ctx = document.getElementById('workoutChart').getContext('2d');
     var myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: {{ chart_labels|safe }},
-            datasets: [{
-                label: 'Workout Frequency',
-                data: {{ chart_data|safe }},
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
+      type: 'bar',
+      data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [{
+          label: 'Workout Frequency',
+          data: {{ chart_data|safe }},
+          backgroundColor: 'rgba(52, 152, 219, 0.2)',
+          borderColor: 'rgba(52, 152, 219, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          }
         },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        precision: 0
-                    }
-                }
-            },
-            responsive: true,
-            maintainAspectRatio: false
-        }
+        responsive: true,
+        maintainAspectRatio: false
+      }
     });
-});
+  });
 </script>
-
 {% endblock %}
